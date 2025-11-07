@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signal Coverage Dashboard</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Chart.js (optional for analytics visuals) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background-color: #f9fafb;
+    }
+    #map {
+      height: 80vh;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+    .leaflet-popup-content {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-700">📡 Signal Coverage Dashboard</h1>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="flex flex-row p-4 gap-4 flex-grow">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white rounded-xl shadow p-4">
+      <h2 class="text-lg font-semibold mb-2">City</h2>
+      <select id="citySelect" class="border p-2 rounded w-full">
+        <option value="bangalore">Bangalore</option>
+        <option value="delhi">Delhi</option>
+        <option value="mumbai">Mumbai</option>
+      </select>
+
+      <h3 class="text-md font-semibold mt-4">Data Type</h3>
+      <div class="mt-2 space-y-2">
+        <label class="block"><input type="radio" name="metric" value="signal_strength" checked /> Signal Strength</label>
+        <label class="block"><input type="radio" name="metric" value="download_mbps" /> Download Speed</label>
+        <label class="block"><input type="radio" name="metric" value="upload_mbps" /> Upload Speed</label>
+        <label class="block"><input type="radio" name="metric" value="latency_ms" /> Latency</label>
+      </div>
+
+      <button id="updateMap" class="mt-4 bg-blue-600 text-white w-full py-2 rounded-lg hover:bg-blue-700">Update Map</button>
+      
+      <!-- Signal Quality Legend -->
+      <div class="mt-6 p-3 bg-gray-50 rounded-lg">
+        <h4 class="text-sm font-semibold mb-2" id="legendTitle">Signal Quality</h4>
+        <div class="space-y-1 text-xs" id="legendContent">
+          <div class="flex items-center"><div class="w-4 h-4 bg-green-500 rounded mr-2"></div>Excellent (80%+)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-green-400 rounded mr-2"></div>Good (60-79%)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-yellow-400 rounded mr-2"></div>Fair (40-59%)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-red-500 rounded mr-2"></div>Poor (<40%)</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col gap-4">
+      <!-- Map Container -->
+      <div id="map" class="rounded-xl shadow-lg"></div>
+      
+      <!-- Data Summary Cards -->
+      <div class="grid grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-2xl font-bold text-blue-600" id="totalAreas">234</div>
+          <div class="text-sm text-gray-600">Total Areas</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-2xl font-bold text-green-600" id="excellentAreas">--</div>
+          <div class="text-sm text-gray-600">Excellent Coverage</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-2xl font-bold text-yellow-600" id="goodAreas">--</div>
+          <div class="text-sm text-gray-600">Good Coverage</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+          <div class="text-2xl font-bold text-red-600" id="poorAreas">--</div>
+          <div class="text-sm text-gray-600">Poor Coverage</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Stats Panel -->
+  <footer class="bg-white shadow-inner mt-4 mx-4 rounded-xl p-4">
+    <h3 class="text-lg font-semibold mb-3">📊 Analytics Summary</h3>
+    <div class="grid grid-cols-4 gap-4 text-center text-gray-700">
+      <div><b>Average Signal</b><br><span id="avgSignal">--</span></div>
+      <div><b>Avg Download</b><br><span id="avgDownload">--</span> Mbps</div>
+      <div><b>Avg Upload</b><br><span id="avgUpload">--</span> Mbps</div>
+      <div><b>Avg Latency</b><br><span id="avgLatency">--</span> ms</div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 mt-4 text-center text-gray-700">
+      <div><b>Best Area</b><br><span id="bestArea">--</span></div>
+      <div><b>Weakest Area</b><br><span id="worstArea">--</span></div>
+    </div>
+    
+    <!-- Coverage Distribution -->
+    <div class="mt-6">
+      <h4 class="text-md font-semibold mb-2">📈 Coverage Distribution</h4>
+      <div class="grid grid-cols-4 gap-2 text-sm text-center">
+        <div class="bg-green-100 p-2 rounded">
+          <div class="text-green-800 font-bold" id="excellentCount">--</div>
+          <div class="text-green-600">Excellent (80%+)</div>
+        </div>
+        <div class="bg-yellow-100 p-2 rounded">
+          <div class="text-yellow-800 font-bold" id="goodCount">--</div>
+          <div class="text-yellow-600">Good (60-79%)</div>
+        </div>
+        <div class="bg-orange-100 p-2 rounded">
+          <div class="text-orange-800 font-bold" id="fairCount">--</div>
+          <div class="text-orange-600">Fair (40-59%)</div>
+        </div>
+        <div class="bg-red-100 p-2 rounded">
+          <div class="text-red-800 font-bold" id="poorCount">--</div>
+          <div class="text-red-600">Poor (<40%)</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    let map;
+    let geoLayer;
+    let allAreasData = []; // Store all areas data for display
+
+    const colorScale = (value) => {
+      if (value >= 80) return "#2ecc71"; // Excellent
+      if (value >= 60) return "#27ae60"; // Good
+      if (value >= 40) return "#f1c40f"; // Moderate
+      return "#e74c3c"; // Poor
+    };
+
+    const latencyColorScale = (value) => {
+      // For latency: lower is better
+      if (value <= 20) return "#2ecc71"; // Excellent (low latency)
+      if (value <= 50) return "#27ae60"; // Good
+      if (value <= 100) return "#f1c40f"; // Moderate
+      return "#e74c3c"; // Poor (high latency)
+    };
+
+    // Initialize map
+    map = L.map("map").setView([12.9716, 77.5946], 11);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    // Load polygon data
+    async function loadGeoData(city, metric) {
+      if (geoLayer) map.removeLayer(geoLayer);
+
+      const res = await fetch(`/api/map/${city}`);
+      const data = await res.json();
+
+      // Store all areas data for display
+      allAreasData = data.features.map(feature => ({
+        name: feature.properties.name,
+        signal: feature.properties.signal_strength,
+        download: feature.properties.download_mbps,
+        upload: feature.properties.upload_mbps,
+        latency: feature.properties.latency_ms
+      })).sort((a, b) => b.signal - a.signal); // Sort by signal strength
+
+      // Filter out large administrative polygons to show only specific neighborhoods
+      const filteredData = {
+        ...data,
+        features: data.features.filter(feature => {
+          const name = feature.properties.name;
+          if (!name) return true; // Keep features without names
+          
+          // Remove large administrative polygons that cover entire city sections
+          const adminKeywords = [
+            'City Corporation', 'Municipal Corporation', 'Corporation',
+            'East Zone', 'West Zone', 'North Zone', 'South Zone', 'Central Zone',
+            'East Division', 'West Division', 'North Division', 'South Division', 'Central Division',
+            'East City', 'West City', 'North City', 'South City', 'Central City',
+            'Greater ', 'Metro ', 'Metropolitan ', 'District ', 'Zone ', 'Division '
+          ];
+          
+          // Check if the name contains any administrative keywords
+          const isAdminArea = adminKeywords.some(keyword => 
+            name.toLowerCase().includes(keyword.toLowerCase())
+          );
+          
+          // Also filter out very generic names that might be large areas
+          const genericPatterns = [
+            /^east\b/i, /^west\b/i, /^north\b/i, /^south\b/i, /^central\b/i,
+            /^greater\b/i, /^metro\b/i, /^district\b/i
+          ];
+          
+          const isGeneric = genericPatterns.some(pattern => pattern.test(name));
+          
+          return !isAdminArea && !isGeneric;
+        })
+      };
+      
+      console.log(`Filtered out ${data.features.length - filteredData.features.length} large corporation polygons`);
+      console.log(`Showing ${filteredData.features.length} specific neighborhoods`);
+
+      geoLayer = L.geoJSON(filteredData, {
+        style: (feature) => ({
+          fillColor: metric === 'latency_ms' ? latencyColorScale(feature.properties[metric]) : colorScale(feature.properties[metric]),
+          color: "#ffffff",  // white borders
+          weight: 1.5,
+          fillOpacity: 0.85, // good visibility for polygons
+        }),
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties;
+          
+          // Get quality rating
+          let quality, qualityIcon;
+          if (p.signal_strength >= 80) {
+            quality = '🟢 Excellent';
+            qualityIcon = '🟢';
+          } else if (p.signal_strength >= 60) {
+            quality = '🟡 Good';
+            qualityIcon = '🟡';
+          } else if (p.signal_strength >= 40) {
+            quality = '🟠 Fair';
+            qualityIcon = '🟠';
+          } else {
+            quality = '🔴 Poor';
+            qualityIcon = '🔴';
+          }
+          
+          layer.bindPopup(`
+            <div style="min-width: 250px;">
+              <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #2c3e50;">
+                ${qualityIcon} ${p.name}
+              </h3>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <div style="background: #e8f5e8; padding: 6px; border-radius: 4px; text-align: center;">
+                  <div style="font-size: 12px; color: #666;">Signal</div>
+                  <div style="font-size: 14px; font-weight: bold; color: #27ae60;">${p.signal_strength.toFixed(1)}%</div>
+                </div>
+                <div style="background: #e3f2fd; padding: 6px; border-radius: 4px; text-align: center;">
+                  <div style="font-size: 12px; color: #666;">Quality</div>
+                  <div style="font-size: 14px; font-weight: bold; color: #2196f3;">${quality}</div>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <div style="background: #fff3e0; padding: 6px; border-radius: 4px; text-align: center;">
+                  <div style="font-size: 12px; color: #666;">Download</div>
+                  <div style="font-size: 14px; font-weight: bold; color: #ff9800;">${p.download_mbps.toFixed(1)} Mbps</div>
+                </div>
+                <div style="background: #f3e5f5; padding: 6px; border-radius: 4px; text-align: center;">
+                  <div style="font-size: 12px; color: #666;">Upload</div>
+                  <div style="font-size: 14px; font-weight: bold; color: #9c27b0;">${p.upload_mbps.toFixed(1)} Mbps</div>
+                </div>
+              </div>
+              <div style="background: #fce4ec; padding: 6px; border-radius: 4px; text-align: center;">
+                <div style="font-size: 12px; color: #666;">Latency</div>
+                <div style="font-size: 14px; font-weight: bold; color: #e91e63;">${p.latency_ms.toFixed(1)} ms</div>
+              </div>
+              <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee; font-size: 11px; color: #999; text-align: center;">
+                Area ID: ${p.area_id}
+              </div>
+            </div>
+          `);
+        },
+      }).addTo(map);
+      
+      // Automatically zoom to fit all ward boundaries
+      map.fitBounds(geoLayer.getBounds());
+
+      updateStats(data);
+    }
+
+    // Calculate and update analytics
+    function updateStats(data) {
+      const feats = data.features;
+      const avg = (f) => feats.reduce((a, b) => a + b.properties[f], 0) / feats.length;
+      const best = feats.reduce((a, b) => a.properties.signal_strength > b.properties.signal_strength ? a : b);
+      const worst = feats.reduce((a, b) => a.properties.signal_strength < b.properties.signal_strength ? a : b);
+
+      document.getElementById("avgSignal").textContent = avg("signal_strength").toFixed(1);
+      document.getElementById("avgDownload").textContent = avg("download_mbps").toFixed(1);
+      document.getElementById("avgUpload").textContent = avg("upload_mbps").toFixed(1);
+      document.getElementById("avgLatency").textContent = avg("latency_ms").toFixed(1);
+      document.getElementById("bestArea").textContent = `${best.properties.name} (${best.properties.signal_strength.toFixed(1)})`;
+      document.getElementById("worstArea").textContent = `${worst.properties.name} (${worst.properties.signal_strength.toFixed(1)})`;
+      
+      // Coverage distribution
+      const excellent = feats.filter(f => f.properties.signal_strength >= 80).length;
+      const good = feats.filter(f => f.properties.signal_strength >= 60 && f.properties.signal_strength < 80).length;
+      const fair = feats.filter(f => f.properties.signal_strength >= 40 && f.properties.signal_strength < 60).length;
+      const poor = feats.filter(f => f.properties.signal_strength < 40).length;
+      
+      document.getElementById("excellentCount").textContent = excellent;
+      document.getElementById("goodCount").textContent = good;
+      document.getElementById("fairCount").textContent = fair;
+      document.getElementById("poorCount").textContent = poor;
+      
+      // Update summary cards
+      document.getElementById("excellentAreas").textContent = excellent;
+      document.getElementById("goodAreas").textContent = good + fair;
+      document.getElementById("poorAreas").textContent = poor;
+      
+      // Update total areas
+      document.getElementById("totalAreas").textContent = feats.length;
+    }
+
+    // Update legend based on selected metric
+    function updateLegend(metric) {
+      const legendTitle = document.getElementById('legendTitle');
+      const legendContent = document.getElementById('legendContent');
+      
+      if (metric === 'latency_ms') {
+        legendTitle.textContent = 'Latency Quality';
+        legendContent.innerHTML = `
+          <div class="flex items-center"><div class="w-4 h-4 bg-green-500 rounded mr-2"></div>Excellent (≤20ms)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-green-400 rounded mr-2"></div>Good (21-50ms)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-yellow-400 rounded mr-2"></div>Fair (51-100ms)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-red-500 rounded mr-2"></div>Poor (>100ms)</div>
+        `;
+      } else {
+        legendTitle.textContent = 'Signal Quality';
+        legendContent.innerHTML = `
+          <div class="flex items-center"><div class="w-4 h-4 bg-green-500 rounded mr-2"></div>Excellent (80%+)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-green-400 rounded mr-2"></div>Good (60-79%)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-yellow-400 rounded mr-2"></div>Fair (40-59%)</div>
+          <div class="flex items-center"><div class="w-4 h-4 bg-red-500 rounded mr-2"></div>Poor (<40%)</div>
+        `;
+      }
+    }
+
+    // Event listeners
+    document.getElementById("updateMap").addEventListener("click", () => {
+      const city = document.getElementById("citySelect").value;
+      const metric = document.querySelector('input[name="metric"]:checked').value;
+      updateLegend(metric);
+      loadGeoData(city, metric);
+    });
+
+    // Update legend when metric radio buttons change
+    document.querySelectorAll('input[name="metric"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        const metric = document.querySelector('input[name="metric"]:checked').value;
+        updateLegend(metric);
+      });
+    });
+
+    // Default load
+    loadGeoData("bangalore", "signal_strength");
+  </script>
+</body>
+</html>
