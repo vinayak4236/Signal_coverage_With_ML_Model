@@ -1,0 +1,235 @@
+Area Name,Signal Strength (%),Download Speed (Mbps),Upload Speed (Mbps),Latency (ms),Samples
+Bengaluru,86.3,105.8,31.6,13.2,0
+Defence Colony,81.1,90.8,26.9,13.3,0
+Thanisandra,54.8,61.4,17.1,22.3,0
+Jakkuru,71.1,82.6,21.4,19.8,0
+Amrutahalli,46.8,46.9,12.0,24.1,0
+Hebbal Kempapura,81.3,105.7,32.8,16.4,0
+Kodigehalli,60.6,71.8,29.0,24.6,0
+Dodda Bommasandra,77.3,104.2,31.6,24.2,0
+Byatarayanapura,82.8,81.7,30.0,13.7,0
+Vidyaranyapura,65.9,90.7,32.3,14.8,0
+Kuvempu Nagar,77.3,104.2,31.6,24.2,0
+Yelahanka Satellite Town,95.0,120.0,36.0,15.0,0
+Chowdeswari Ward,73.9,101.9,31.4,17.3,0
+Atturu,46.8,46.9,12.0,24.1,0
+Kogilu,95.0,120.0,40.2,15.7,0
+Kempegowda Ward,95.0,120.0,38.6,18.0,0
+Hegganahalli,81.3,100.5,33.0,21.9,0
+Rajagopal Nagar,56.7,79.8,23.2,30.1,0
+Chokkasandra,59.7,68.8,22.6,23.0,0
+Nalagadarenahalli,59.7,68.8,22.6,23.0,0
+Peenya Industrial Area,56.7,79.8,23.2,30.1,0
+Sunkadakatte,95.0,120.0,42.7,12.0,0
+T Dasarahalli,65.0,71.8,20.7,25.2,0
+Bagalakunte,95.0,113.7,37.6,12.0,0
+Mallasandra,84.2,106.3,35.8,16.4,0
+Chikkasandra,89.4,106.3,43.0,12.0,0
+Kammagondanahalli,76.6,94.4,26.2,25.0,0
+Rajarajeshwari Nagar,85.6,99.7,29.9,13.7,0
+Kengeri,71.5,84.8,28.7,21.8,0
+Bande Mutt,56.1,75.3,28.0,28.5,0
+JP Park,71.2,103.5,41.3,22.0,0
+Yeshwanthpura,64.5,80.8,28.2,13.7,0
+Jalahalli,88.9,100.3,33.7,17.1,0
+Peenya,54.5,52.7,17.7,22.8,0
+Laxmidevi Nagar,59.3,78.3,26.2,30.2,0
+Laggere,70.3,85.6,22.6,18.1,0
+Chowdeshwari Nagar,51.0,55.2,10.8,29.1,0
+Kottegepalya,70.2,79.2,32.5,23.0,0
+Jnana Bharathi Ward,59.0,63.9,20.9,20.0,0
+Malathalli,62.3,71.6,20.7,29.6,0
+Srigandhadakaval,44.6,47.0,17.4,33.6,0
+Herohalli,48.3,68.3,19.3,20.7,0
+Nagadevanahalli,41.7,39.8,14.2,33.4,0
+Ullalu,60.6,85.4,31.0,21.7,0
+Lingadheeranahalli,44.6,47.0,17.4,33.6,0
+Dodda Bidarakallu,55.6,69.7,18.6,27.1,0
+Uttarahalli,59.0,63.9,20.9,20.0,0
+Vasanthpura,95.0,120.0,42.5,16.4,0
+Yelchenahalli,59.1,73.8,14.5,27.8,0
+Jaraganahalli,73.1,78.2,20.8,12.0,0
+Puttenahalli,93.3,120.0,40.3,13.3,0
+Bilekhalli,72.5,102.5,41.9,22.3,0
+Hulimavu,62.5,78.8,22.7,29.4,0
+RBI Layout,78.1,101.7,32.9,14.4,0
+Konanakunte,58.7,72.8,26.6,32.0,0
+Subrahmanyapura,69.2,91.4,31.6,18.5,0
+Anjanapura,67.1,92.9,31.0,14.7,0
+Kalena Agrahara,38.2,29.1,9.1,31.9,0
+Hongasandra,56.7,79.8,23.2,30.1,0
+Gharebhavipalya,41.8,47.1,14.3,29.2,0
+Begur,84.6,102.3,28.9,14.1,0
+Naganathapura,95.0,112.6,39.3,12.0,0
+Hosa Road,69.6,79.0,25.9,18.4,0
+Mangammanapalya,81.4,104.8,37.5,17.3,0
+HSR Layout,64.2,82.1,31.1,26.6,0
+Ibluru,54.5,52.7,17.7,22.8,0
+Kudlu,61.9,80.3,27.3,15.6,0
+Bellanduru,71.2,103.5,41.3,22.0,0
+Varthuru,70.8,94.4,33.6,26.8,0
+Kadugodi,70.8,84.2,27.9,19.3,0
+White Field,55.5,69.7,22.2,27.4,0
+Munekollal,55.2,66.1,22.4,27.4,0
+AECS Layout,95.0,120.0,41.2,19.3,0
+Hudi,44.1,45.0,10.5,33.3,0
+Garudachar Palya,89.3,103.4,36.2,12.0,0
+Dodda Nekkundi,25.9,29.4,8.0,35.3,0
+Vijnana Nagar,78.7,95.6,34.6,13.9,0
+Byrathi,87.2,105.4,26.5,14.5,0
+Basavanapura,31.0,50.1,16.5,35.1,0
+Devasandra,47.7,63.8,18.8,27.1,0
+A. Narayanapura,95.0,120.0,37.0,12.0,0
+K R Puram,27.8,33.0,9.1,30.9,0
+Ramamurthy Nagar,95.0,120.0,41.8,12.0,0
+Vijinapura,89.9,103.8,28.0,12.9,0
+Kalkere,95.0,120.0,35.3,12.0,0
+Horamavu,85.1,107.4,39.8,14.3,0
+Challakere,95.0,120.0,41.2,19.3,0
+HAL Airport,60.6,71.8,29.0,24.6,0
+Marathahalli,92.3,119.0,36.8,14.5,0
+Gottigere,42.8,42.2,17.9,28.5,0
+Padmanabha Nagar,38.2,29.1,9.1,31.9,0
+Kumaraswamy Layout,72.1,81.2,25.4,20.8,0
+Banashankari Temple ward,87.5,115.7,38.7,12.0,0
+Sarakki,46.5,66.8,22.0,30.0,0
+J P Nagar,61.4,89.3,26.6,23.6,0
+BTM Layout,64.9,78.9,19.1,22.3,0
+Chikkalsandra,75.2,94.0,35.0,12.1,0
+Ganesh Mandir Ward,95.0,119.8,43.7,12.0,0
+Devagiri Temple Ward,95.0,117.6,40.3,19.1,0
+Shakambari Nagar,70.2,79.2,32.5,23.0,0
+Gurappanapalya,77.8,94.2,32.5,12.0,0
+Jayanagar East,41.8,47.1,14.3,29.2,0
+Someswara Temple Ward,80.7,107.2,35.5,16.4,0
+Madivala,70.3,85.6,22.6,18.1,0
+Byrasandra,77.8,94.2,32.5,12.0,0
+B Venkata Reddy Nagar,95.0,113.5,33.8,13.9,0
+Yediyur,60.9,89.9,23.8,20.6,0
+Vidyapeeta Ward,73.7,93.4,30.7,12.9,0
+Lakkasandra,43.9,49.1,12.2,34.8,0
+Hombegowda Nagar,47.3,54.2,12.2,27.3,0
+Vishveshwara Puram,82.5,98.0,32.9,18.2,0
+Sunkenahalli,86.6,108.5,38.3,14.1,0
+Dodda Ganapati,59.0,80.1,23.9,22.5,0
+Swamy Vivekananda,66.8,81.9,35.9,21.0,0
+Katriguppe,53.3,64.8,19.2,17.5,0
+Hosakerehalli,75.2,94.0,35.0,12.1,0
+Srinagar,73.7,93.4,30.7,12.9,0
+Avalahalli,95.0,113.2,45.0,14.1,0
+Gavi Gangadhareshwara,60.9,89.9,23.8,20.6,0
+New Guddadahalli,71.3,76.0,27.5,24.9,0
+Deepanjali Nagar,30.2,47.9,10.3,32.6,0
+Gali Anjaneya Temple Ward,48.8,66.0,21.4,33.9,0
+Hampi Nagar,71.3,76.0,27.5,24.9,0
+Attiguppe,66.8,81.9,35.9,21.0,0
+Hosahalli,55.6,69.7,18.6,27.1,0
+Vijayanagar,95.0,120.0,40.9,12.0,0
+Kempapura Agrahara,51.0,55.2,10.8,29.1,0
+Ejipura,89.7,110.7,39.0,20.5,0
+Silver Jublee Park,81.4,104.8,37.5,17.3,0
+Dharmaraya Swamy Temple,35.0,37.1,10.7,42.2,0
+Jakkasandra,95.0,113.2,36.2,12.0,0
+Adugodi,95.0,113.7,37.6,12.0,0
+Koramangala,45.2,52.4,15.3,27.8,0
+Kadugondanahalli,63.3,83.3,22.8,19.3,0
+Muneshwara Nagar,70.6,85.6,32.3,18.3,0
+Kaggadasanapura,77.9,96.2,31.7,23.2,0
+Banasavadi,29.8,40.5,9.4,30.4,0
+Kammanahalli,46.0,49.4,16.8,28.9,0
+Subbayyanapalya,41.4,51.0,13.7,33.1,0
+Kacharkanahalli,93.0,109.4,35.6,14.0,0
+Lingarajapura,63.3,83.3,22.8,19.3,0
+Kushal Nagar,42.2,55.6,27.1,35.6,0
+Hennur,86.5,111.3,41.6,18.4,0
+Devara Jeevanahalli,49.9,50.4,21.2,27.2,0
+Kaval Bairasandra,63.3,83.3,22.8,19.3,0
+Nagavara,82.8,81.7,30.0,13.7,0
+Manorayanapalya,63.3,83.3,22.8,19.3,0
+Vishwanath Nagenahalli,40.3,47.0,10.0,38.1,0
+Chamundi Nagara,49.9,50.4,21.2,27.2,0
+Konena Agrahara,49.6,67.5,24.8,22.2,0
+C V Raman Nagar,39.2,48.6,15.8,25.5,0
+New Tippasandara,65.9,90.7,32.3,14.8,0
+Jeevanbhima Nagar,77.3,104.2,31.6,24.2,0
+Domlur,95.0,116.5,37.7,12.0,0
+Hoysala Nagar,53.2,71.7,25.5,28.3,0
+Jogupalya,75.0,107.2,37.3,22.5,0
+Benniganahalli,77.9,96.2,31.7,23.2,0
+Maruthi Seva Nagar,69.7,80.3,21.2,22.7,0
+Cox Town,86.9,110.9,34.3,12.0,0
+Ulsoor,50.5,71.5,35.2,21.6,0
+Bharathi Nagar,70.9,83.2,22.0,18.1,0
+Pulikeshinagar,64.6,75.5,23.5,21.7,0
+Shivaji Nagar,58.3,71.4,28.8,18.7,0
+Agaram,79.5,110.7,40.4,12.0,0
+Nilasandra,54.5,52.7,17.7,22.8,0
+Shanthi Nagar,73.0,92.7,26.1,20.5,0
+Vannarpet,62.8,81.4,23.6,27.6,0
+Ashok Nagar,25.0,33.8,10.7,38.8,0
+Sampangiram Nagar,62.5,81.3,19.0,23.3,0
+Vasanthnagar,79.5,110.7,40.4,12.0,0
+S K Garden,53.3,66.8,25.1,29.0,0
+Ramaswamypalya,70.1,67.8,28.2,19.5,0
+Jayachamarajendra Nagar,60.9,76.3,27.3,23.0,0
+Ganga Nagar,57.9,68.0,25.0,33.4,0
+Hebbala,55.2,55.6,16.9,24.2,0
+Sanjaya Nagar,92.3,119.0,36.8,14.5,0
+Radhakrishna Temple Ward,49.6,67.5,24.8,22.2,0
+Azad Nagar,60.9,89.9,23.8,20.6,0
+Devaraj Urs Nagar,66.2,78.9,19.3,16.6,0
+Chamrajapet,81.7,115.1,29.9,12.0,0
+Chalavadipalya,69.6,79.0,25.9,18.4,0
+Rayapuram,41.8,47.1,14.3,29.2,0
+Padarayanapura,86.3,102.3,36.9,12.0,0
+K R Market,81.5,103.3,36.7,15.8,0
+Chickpete,61.9,80.3,27.3,15.6,0
+Cottonpete,70.3,85.6,22.6,18.1,0
+Subhash Nagar,95.0,113.2,36.2,12.0,0
+Binnipete,49.1,69.8,23.0,29.6,0
+Okalipuram,61.9,80.3,27.3,15.6,0
+Sriramamandir,74.3,88.4,34.5,19.2,0
+Dayananda Nagar,95.0,113.7,37.6,12.0,0
+Gandhinagar,59.3,78.3,26.2,30.2,0
+Dattatreya Temple,62.5,81.3,19.0,23.3,0
+Rajamahal Guttahalli,64.1,90.8,30.8,20.7,0
+Chandra Layout,71.5,63.2,22.9,15.2,0
+Nayandahalli,83.7,103.3,40.4,20.3,0
+Maruthi Mandir Ward,73.7,93.4,30.7,12.9,0
+Marenahalli,60.8,80.2,23.5,21.3,0
+Dr. Raj Kumar Agrahara Dasarahalli,80.7,107.2,35.5,16.4,0
+Govindaraja Nagar,86.6,108.5,38.3,14.1,0
+Shivanagara,68.9,64.4,16.6,23.4,0
+Basaveshwara Nagar,95.0,112.6,39.3,12.0,0
+Rajaji Nagar,68.7,87.5,32.8,20.9,0
+Gayithri Nagar,75.4,97.5,39.1,15.7,0
+Subramanya Nagar,64.5,73.5,21.0,22.2,0
+Kadu Malleshwar Ward,59.4,65.9,22.3,26.4,0
+Nagapura,95.0,113.7,37.6,12.0,0
+Aramane Nagara,58.3,71.4,28.8,18.7,0
+Mattikere,75.0,107.2,37.3,22.5,0
+Malleswaram,79.5,110.7,40.4,12.0,0
+Mahalakshmipuram,35.0,37.1,10.7,42.2,0
+Rajiv Nagar,45.2,52.4,15.3,27.8,0
+Nalvadi Krishna Raja Wadiyar,81.4,104.8,37.5,17.3,0
+Dr. Puneet Rajkumar,35.0,37.1,10.7,42.2,0
+Shankar Matt,49.1,69.8,23.0,29.6,0
+Kamakshipalya,77.8,94.2,32.5,12.0,0
+Shakthi Ganapathi Nagar,69.6,79.0,25.9,18.4,0
+Vrisabhavathi Nagar,81.3,100.5,33.0,21.9,0
+Kaveripura,61.4,89.3,26.6,23.6,0
+Mudalapalya,48.8,66.0,21.4,33.9,0
+Nagarabhavi,90.9,107.8,40.2,12.0,0
+HBR Layout,39.2,48.6,15.8,25.5,0
+Sagayarapuram,86.9,110.9,34.3,12.0,0
+Suddagunte Palya,68.9,64.4,16.6,23.4,0
+Lakshmipura,92.3,119.0,36.8,14.5,0
+Shigehalli,73.9,93.8,26.3,25.1,0
+Bengaluru East City Corporation,95.0,120.0,41.8,12.0,0
+Bengaluru South City Corporation,93.3,120.0,40.3,13.3,0
+Bengaluru North City Corporation,77.9,96.2,31.7,23.2,0
+Bengaluru West City Corporation,95.0,101.6,29.0,13.9,0
+Bengaluru Central City Corporation,71.2,103.5,41.3,22.0,0
+,81.1,90.8,26.9,13.3,0
+,70.6,85.6,32.3,18.3,0
+BLiSC Campus,78.7,95.6,34.6,13.9,0

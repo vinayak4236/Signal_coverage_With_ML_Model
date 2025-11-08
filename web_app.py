@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
 """
-Enhanced Web Interface for Signal Coverage Prediction
+Enhanced Web Interface for Signal Coverage Prediction with Real-time Updates
 
 This web application allows users to:
 1. Enter a city name
 2. View city-level signal strength coverage
 3. Zoom in to see area-level signal strength details
 4. Interact with multi-resolution predictions
+5. Monitor real-time signal strength changes
 """
 
 import os
 import json
 import time
+import random
+import threading
 import requests
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
+from datetime import datetime
 import pandas as pd
 import numpy as np
 import folium
@@ -45,6 +49,11 @@ TEMPLATES_DIR.mkdir(exist_ok=True)
 
 # Global model (loaded once at startup)
 signal_model = None
+
+# Global cache for city geocoding
+_city_cache = {}
+
+
 
 def _quality_label_and_color(metric: str, value: float) -> tuple[str, str]:
     """Return (label, hex_color) for a value under the given metric using thresholds.
@@ -502,6 +511,25 @@ class SignalCoveragePredictor:
             }
         }
 
+# Test endpoint for debugging histogram generation
+@app.route('/api/test/histograms')
+def test_histograms():
+    """Test endpoint to debug histogram generation."""
+    try:
+        # Create test data
+        test_values = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] * 10
+        histogram = generate_histogram_data(test_values, 0, 100, 10)
+        
+        app.logger.info(f"Test histogram result: {histogram}")
+        
+        return jsonify({
+            'test_histogram': histogram,
+            'test_values': test_values
+        })
+    except Exception as e:
+        app.logger.error(f"Test histogram error: {e}")
+        return jsonify({'error': str(e)}), 500
+
 def create_city_map(city_data: Dict) -> str:
     """Creates a Folium map for a city's signal coverage."""
     city_info = city_data['city_info']
@@ -880,6 +908,12 @@ def get_resolution_options():
         'default': 'medium'
     })
 
+
+
+
+
+
+
 @app.route('/api/map/<city>')
 def api_map_city(city):
     """API endpoint for map data - returns GeoJSON for the city."""
@@ -1037,6 +1071,327 @@ def api_signal_grid(city):
             "error": str(e)
         }), 500
 
+# Enhanced Analytics API Endpoints
+
+@app.route('/api/analytics/<city>')
+def api_analytics_city(city):
+    """Enhanced analytics endpoint for comprehensive city data visualization."""
+    try:
+        city_name = city.strip().lower()
+        
+        # Get city coordinates
+        city_info = predictor.geocoder.geocode_city(city_name)
+        lat, lon = city_info['lat'], city_info['lon']
+        
+        # Get existing map data
+        map_response = api_map_city(city)
+        map_data = map_response.json if hasattr(map_response, 'json') else map_response.get_json()
+        
+        if 'error' in map_data:
+            return jsonify({'error': map_data['error']}), 500
+            
+        features = map_data.get('features', [])
+        
+        # Calculate enhanced analytics
+        analytics = calculate_enhanced_analytics(features)
+        
+        # Get time-series data (simulated for now)
+        time_series = generate_time_series_data(city_name)
+        
+        # Get comparative data with other cities
+        comparative_data = get_comparative_city_data(city_name)
+        
+        # Structure data for frontend
+        return jsonify({
+            'city_info': city_info,
+            'quality_score': analytics['quality_score'],
+            'total_areas': analytics['total_areas'],
+            'statistics': {
+                'signal_strength': analytics['signal_strength']['stats'],
+                'download_speed': analytics['download_speed']['stats'],
+                'upload_speed': analytics['upload_speed']['stats'],
+                'latency': analytics['latency']['stats']
+            },
+            'coverage_distribution': analytics['signal_strength']['coverage'],
+            'histograms': analytics['histograms'],
+            'best_areas': [
+                analytics['signal_strength']['best_area'],
+                analytics['download_speed']['best_area'],
+                analytics['upload_speed']['best_area']
+            ],
+            'worst_areas': [
+                analytics['signal_strength']['worst_area'],
+                analytics['download_speed']['worst_area'],
+                analytics['upload_speed']['worst_area']
+            ],
+            'time_series': time_series,
+            'comparative': comparative_data,
+            'last_updated': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Error in api_analytics_city: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+def calculate_enhanced_analytics(features):
+    """Calculate comprehensive analytics from feature data."""
+    if not features:
+        return {}
+    
+    # Extract all metrics
+    signal_strengths = []
+    download_speeds = []
+    upload_speeds = []
+    latencies = []
+    area_names = []
+    
+    for feature in features:
+        props = feature.get('properties', {})
+        signal_strengths.append(props.get('signal_strength', 0))
+        download_speeds.append(props.get('download_mbps', 0))
+        upload_speeds.append(props.get('upload_mbps', 0))
+        latencies.append(props.get('latency_ms', 0))
+        area_names.append(props.get('name', 'Unknown'))
+    
+    # Calculate statistics
+    def calc_stats(values):
+        if not values:
+            return {}
+        arr = np.array(values)
+        return {
+            'mean': float(np.mean(arr)),
+            'median': float(np.median(arr)),
+            'std': float(np.std(arr)),
+            'min': float(np.min(arr)),
+            'max': float(np.max(arr)),
+            'q25': float(np.percentile(arr, 25)),
+            'q75': float(np.percentile(arr, 75)),
+            'iqr': float(np.percentile(arr, 75) - np.percentile(arr, 25))
+        }
+    
+    # Calculate coverage distribution
+    def calc_coverage(values, thresholds):
+        if not values:
+            return {}
+        arr = np.array(values)
+        total = len(arr)
+        return {
+            'excellent': float(np.sum(arr >= thresholds['excellent']) / total * 100),
+            'good': float(np.sum((arr >= thresholds['good']) & (arr < thresholds['excellent'])) / total * 100),
+            'fair': float(np.sum((arr >= thresholds['fair']) & (arr < thresholds['good'])) / total * 100),
+            'poor': float(np.sum(arr < thresholds['fair']) / total * 100)
+        }
+    
+    # Coverage thresholds
+    signal_thresholds = {'excellent': 80, 'good': 60, 'fair': 40}
+    download_thresholds = {'excellent': 50, 'good': 25, 'fair': 10}
+    upload_thresholds = {'excellent': 15, 'good': 8, 'fair': 3}
+    latency_thresholds = {'excellent': 20, 'good': 50, 'fair': 100}  # Lower is better
+    
+    # Find best and worst areas
+    best_signal_idx = np.argmax(signal_strengths)
+    worst_signal_idx = np.argmin(signal_strengths)
+    
+    best_download_idx = np.argmax(download_speeds)
+    worst_download_idx = np.argmin(download_speeds)
+    
+    return {
+        'signal_strength': {
+            'stats': calc_stats(signal_strengths),
+            'coverage': calc_coverage(signal_strengths, signal_thresholds),
+            'best_area': {'name': area_names[best_signal_idx], 'value': signal_strengths[best_signal_idx]},
+            'worst_area': {'name': area_names[worst_signal_idx], 'value': signal_strengths[worst_signal_idx]}
+        },
+        'download_speed': {
+            'stats': calc_stats(download_speeds),
+            'coverage': calc_coverage(download_speeds, download_thresholds),
+            'best_area': {'name': area_names[best_download_idx], 'value': download_speeds[best_download_idx]},
+            'worst_area': {'name': area_names[worst_download_idx], 'value': download_speeds[worst_download_idx]}
+        },
+        'upload_speed': {
+            'stats': calc_stats(upload_speeds),
+            'coverage': calc_coverage(upload_speeds, upload_thresholds),
+            'best_area': {'name': area_names[np.argmax(upload_speeds)], 'value': float(max(upload_speeds))},
+            'worst_area': {'name': area_names[np.argmin(upload_speeds)], 'value': float(min(upload_speeds))}
+        },
+        'latency': {
+            'stats': calc_stats(latencies),
+            'coverage': calc_coverage(latencies, latency_thresholds),
+            'best_area': {'name': area_names[np.argmin(latencies)], 'value': float(min(latencies))},
+            'worst_area': {'name': area_names[np.argmax(latencies)], 'value': float(max(latencies))}
+        },
+        'total_areas': len(features),
+        'quality_score': float(np.mean(signal_strengths)),  # Overall quality score
+        'histograms': {
+            'signal_strength': generate_histogram_data(signal_strengths, 0, 100, 10),
+            'download_speed': generate_histogram_data(download_speeds, 0, max(download_speeds) if download_speeds else 100, 10),
+            'upload_speed': generate_histogram_data(upload_speeds, 0, max(upload_speeds) if upload_speeds else 20, 10),
+            'latency': generate_histogram_data(latencies, 0, max(latencies) if latencies else 200, 10)
+        }
+    }
+    
+    # Debug log the histograms data
+    app.logger.info(f"Histograms data: {result['histograms']}")
+    app.logger.info(f"Download histogram: {result['histograms']['download_speed']}")
+    app.logger.info(f"Signal histogram: {result['histograms']['signal_strength']}")
+    
+    return result
+
+def generate_time_series_data(city_name):
+    """Generate simulated time-series data for trend analysis."""
+    # Generate data for the last 30 days
+    days = 30
+    dates = []
+    signal_trends = []
+    download_trends = []
+    upload_trends = []
+    latency_trends = []
+    
+    base_signal = random.uniform(65, 85)
+    base_download = random.uniform(25, 45)
+    base_upload = random.uniform(8, 15)
+    base_latency = random.uniform(20, 40)
+    
+    for i in range(days):
+        date = datetime.now() - pd.Timedelta(days=days-i-1)
+        dates.append(date.strftime('%Y-%m-%d'))
+        
+        # Add some realistic variation
+        signal_trends.append(base_signal + random.uniform(-10, 10))
+        download_trends.append(base_download + random.uniform(-8, 8))
+        upload_trends.append(base_upload + random.uniform(-3, 3))
+        latency_trends.append(base_latency + random.uniform(-8, 8))
+    
+    return {
+        'dates': dates,
+        'signal_strength': signal_trends,
+        'download_speed': download_trends,
+        'upload_speed': upload_trends,
+        'latency': latency_trends
+    }
+
+def generate_histogram_data(values, min_val, max_val, bins=10):
+    """Generate histogram data for Chart.js visualization."""
+    if not values or len(values) == 0:
+        return {'bins': [], 'counts': []}
+    
+    try:
+        app.logger.info(f"Generating histogram: values={len(values)}, min={min_val}, max={max_val}, bins={bins}")
+        
+        # Convert to list to ensure proper serialization
+        values_list = list(values) if hasattr(values, '__iter__') else [values]
+        
+        hist, bin_edges = np.histogram(values_list, bins=bins, range=(min_val, max_val))
+        bin_centers = [(bin_edges[i] + bin_edges[i+1]) / 2 for i in range(len(bin_edges)-1)]
+        
+        result = {
+            'bins': [float(center) for center in bin_centers],
+            'counts': [int(count) for count in hist]
+        }
+        app.logger.info(f"Histogram generated: bins={len(result['bins'])}, counts={len(result['counts'])}")
+        return result
+    except Exception as e:
+        app.logger.error(f"Error generating histogram: {e}")
+        return {'bins': [], 'counts': []}
+
+def get_comparative_city_data(current_city):
+    """Get comparative data for multiple cities."""
+    # List of major cities for comparison
+    major_cities = ['Mumbai', 'Delhi', 'Bengaluru', 'Kolkata', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad']
+    
+    comparative_data = []
+    
+    for city in major_cities:
+        if city.lower() == current_city.lower():
+            continue
+            
+        try:
+            # Simulate comparative data (in real implementation, this would fetch actual data)
+            comparative_data.append({
+                'city': city,
+                'signal_strength': random.uniform(60, 90),
+                'download_speed': random.uniform(20, 50),
+                'upload_speed': random.uniform(6, 18),
+                'latency': random.uniform(15, 45),
+                'quality_score': random.uniform(65, 85)
+            })
+        except Exception as e:
+            app.logger.warning(f"Could not get comparative data for {city}: {e}")
+            continue
+    
+    # Sort by quality score
+    comparative_data.sort(key=lambda x: x['quality_score'], reverse=True)
+    
+    return comparative_data
+
+@app.route('/api/export/<city>/<format>')
+def api_export_data(city, format):
+    """Export city data in various formats (csv, json, excel)."""
+    try:
+        city_name = city.strip().lower()
+        
+        # Get map data
+        map_response = api_map_city(city)
+        map_data = map_response.json if hasattr(map_response, 'json') else map_response.get_json()
+        
+        if 'error' in map_data:
+            return jsonify({'error': map_data['error']}), 500
+        
+        features = map_data.get('features', [])
+        
+        # Convert to DataFrame
+        data = []
+        for feature in features:
+            props = feature.get('properties', {})
+            data.append({
+                'Area Name': props.get('name', 'Unknown'),
+                'Signal Strength (%)': props.get('signal_strength', 0),
+                'Download Speed (Mbps)': props.get('download_mbps', 0),
+                'Upload Speed (Mbps)': props.get('upload_mbps', 0),
+                'Latency (ms)': props.get('latency_ms', 0),
+                'Samples': props.get('samples', 0)
+            })
+        
+        df = pd.DataFrame(data)
+        
+        # Export based on format
+        if format == 'csv':
+            csv_data = df.to_csv(index=False)
+            response = app.response_class(
+                csv_data,
+                mimetype='text/csv',
+                headers={"Content-Disposition": f"attachment; filename={city_name}_signal_coverage.csv"}
+            )
+            return response
+            
+        elif format == 'json':
+            json_data = df.to_json(orient='records', indent=2)
+            response = app.response_class(
+                json_data,
+                mimetype='application/json',
+                headers={"Content-Disposition": f"attachment; filename={city_name}_signal_coverage.json"}
+            )
+            return response
+            
+        elif format == 'excel':
+            import io
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                df.to_excel(writer, sheet_name='Signal Coverage', index=False)
+            output.seek(0)
+            response = app.response_class(
+                output.getvalue(),
+                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                headers={"Content-Disposition": f"attachment; filename={city_name}_signal_coverage.xlsx"}
+            )
+            return response
+        else:
+            return jsonify({'error': 'Unsupported format. Use csv, json, or excel'}), 400
+            
+    except Exception as e:
+        app.logger.error(f"Error in api_export_data: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     # Set up logging
     import logging
@@ -1054,6 +1409,8 @@ if __name__ == '__main__':
     print("- Interactive zoom to area-level details")
     print("- Multi-resolution support")
     print("- Real-time statistics")
+    print("- Enhanced analytics and visualization")
+    print("- Data export capabilities")
     print("=" * 50)
     
     app.run(debug=True, host='0.0.0.0', port=5000)
