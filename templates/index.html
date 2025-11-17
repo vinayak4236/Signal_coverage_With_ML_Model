@@ -45,6 +45,67 @@
       border-radius: 50%;
       margin-right: 5px;
     }
+    
+    /* Professional Analytics Styles */
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      transition: width 1s ease-out;
+    }
+    .progress-excellent {
+      background: linear-gradient(90deg, #10B981, #059669);
+    }
+    .progress-good {
+      background: linear-gradient(90deg, #3B82F6, #1D4ED8);
+    }
+    .progress-fair {
+      background: linear-gradient(90deg, #F59E0B, #D97706);
+    }
+    .progress-poor {
+      background: linear-gradient(90deg, #EF4444, #DC2626);
+    }
+    
+    /* Chart container styling */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    
+    /* Smooth animations */
+    .animate-in {
+      animation: slideInUp 0.6s ease-out;
+    }
+    
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -59,6 +120,34 @@
 
     <!-- Sidebar -->
     <aside class="w-64 bg-white rounded-xl shadow p-4">
+      <!-- Search Bar for Neighborhood Detection -->
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold mb-2">🔍 Search Location</h2>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="placeSearch" 
+            placeholder="Enter any place name..." 
+            class="border p-2 rounded flex-1 text-sm"
+            onkeypress="if(event.key === 'Enter') searchPlace()"
+          />
+          <button 
+            onclick="searchPlace()" 
+            class="bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition-colors"
+            title="Search Place"
+          >
+            🔍
+          </button>
+        </div>
+        <div id="searchStatus" class="mt-2 text-xs text-gray-600 hidden"></div>
+        <div id="placeDetails" class="mt-3 p-3 bg-blue-50 rounded-lg hidden">
+          <div class="text-sm font-semibold text-blue-800 mb-1" id="neighbourhoodName">--</div>
+          <div class="text-xs text-blue-600" id="locationDetails">--</div>
+        </div>
+      </div>
+
+      <hr class="my-4 border-gray-200">
+
       <h2 class="text-lg font-semibold mb-2">City</h2>
       <select id="citySelect" class="border p-2 rounded w-full">
         <option value="bangalore">Bangalore</option>
@@ -158,95 +247,253 @@
   </footer>
 
   <!-- Enhanced Analytics Dashboard -->
-  <section class="bg-white shadow-inner mt-4 mx-4 rounded-xl p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h3 class="text-2xl font-bold text-gray-800">📊 Enhanced Analytics Dashboard</h3>
-      <div class="flex gap-2">
-        <button id="exportCSV" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-          📊 Export CSV
-        </button>
-        <button id="exportJSON" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-          📋 Export JSON
-        </button>
-        <button id="exportExcel" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
-          📈 Export Excel
-        </button>
+  <section class="bg-gradient-to-br from-slate-50 to-blue-50 mt-4 mx-4 rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 px-8 py-6">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-4">
+          <div class="bg-blue-500 rounded-full p-3">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-3xl font-bold text-white mb-1">Enhanced Analytics Dashboard</h3>
+            <p class="text-slate-300 text-sm">Comprehensive signal coverage insights and performance metrics</p>
+          </div>
+        </div>
+        
+        <!-- Export Buttons -->
+        <div class="flex space-x-3">
+          <button id="exportCSV" class="group bg-white/10 backdrop-blur-sm text-white px-5 py-3 rounded-xl hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="font-medium">CSV</span>
+          </button>
+          <button id="exportJSON" class="group bg-white/10 backdrop-blur-sm text-white px-5 py-3 rounded-xl hover:bg-white/20 transition-all duration-300 border border-white/20 flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+            <span class="font-medium">JSON</span>
+          </button>
+          <button id="exportExcel" class="group bg-blue-500 text-white px-5 py-3 rounded-xl hover:bg-blue-600 transition-all duration-300 flex items-center space-x-2 shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="font-medium">Excel</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div id="analyticsLoading" class="text-center py-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-600">Loading enhanced analytics...</p>
+    <div id="analyticsLoading" class="text-center py-16 bg-white/50 backdrop-blur-sm">
+      <div class="relative inline-block">
+        <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-6"></div>
+        <div class="absolute inset-0 rounded-full h-16 w-16 border-4 border-blue-300 animate-ping opacity-20"></div>
+      </div>
+      <p class="text-gray-600 text-lg font-medium">Loading enhanced analytics...</p>
+      <p class="text-gray-500 text-sm mt-2">Preparing comprehensive insights</p>
     </div>
 
     <!-- Analytics Content -->
-    <div id="analyticsContent" class="hidden">
+    <div id="analyticsContent" class="hidden px-8 py-8">
       <!-- Key Metrics Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-xl">
-          <div class="text-2xl font-bold" id="qualityScore">--</div>
-          <div class="text-sm opacity-90">Quality Score</div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <!-- Quality Score Card -->
+        <div class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-blue-100 rounded-full p-3">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <span class="text-blue-600 text-sm font-semibold bg-blue-50 px-2 py-1 rounded-full">Quality</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800 mb-2" id="qualityScore">--</div>
+          <div class="text-gray-600 text-sm font-medium">Overall Score</div>
+          <div class="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-1000" id="qualityScoreBar"></div>
+          </div>
         </div>
-        <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-xl">
-          <div class="text-2xl font-bold" id="totalAreasAnalytics">--</div>
-          <div class="text-sm opacity-90">Total Areas</div>
+
+        <!-- Total Areas Card -->
+        <div class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-green-100 rounded-full p-3">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <span class="text-green-600 text-sm font-semibold bg-green-50 px-2 py-1 rounded-full">Coverage</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800 mb-2" id="totalAreasAnalytics">--</div>
+          <div class="text-gray-600 text-sm font-medium">Total Areas</div>
+          <div class="mt-3 flex items-center text-green-600 text-xs">
+            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+            <span>Complete Coverage</span>
+          </div>
         </div>
-        <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-xl">
-          <div class="text-2xl font-bold" id="avgDownloadAnalytics">--</div>
-          <div class="text-sm opacity-90">Avg Download</div>
+
+        <!-- Download Speed Card -->
+        <div class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-yellow-100 rounded-full p-3">
+              <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+              </svg>
+            </div>
+            <span class="text-yellow-600 text-sm font-semibold bg-yellow-50 px-2 py-1 rounded-full">Speed</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800 mb-2" id="avgDownloadAnalytics">--</div>
+          <div class="text-gray-600 text-sm font-medium">Avg Download</div>
+          <div class="mt-3 text-yellow-600 text-xs font-medium">Mbps</div>
         </div>
-        <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-xl">
-          <div class="text-2xl font-bold" id="avgLatencyAnalytics">--</div>
-          <div class="text-sm opacity-90">Avg Latency</div>
+
+        <!-- Latency Card -->
+        <div class="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-purple-100 rounded-full p-3">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <span class="text-purple-600 text-sm font-semibold bg-purple-50 px-2 py-1 rounded-full">Latency</span>
+          </div>
+          <div class="text-3xl font-bold text-gray-800 mb-2" id="avgLatencyAnalytics">--</div>
+          <div class="text-gray-600 text-sm font-medium">Avg Latency</div>
+          <div class="mt-3 text-purple-600 text-xs font-medium">Milliseconds</div>
         </div>
       </div>
 
       <!-- Charts Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
         <!-- Signal Strength Distribution -->
-        <div class="bg-gray-50 p-4 rounded-xl">
-          <h4 class="text-lg font-semibold mb-4 text-gray-800">📶 Signal Strength Distribution</h4>
-          <canvas id="signalDistributionChart" width="400" height="200"></canvas>
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="bg-blue-100 rounded-full p-2">
+                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-bold text-gray-800">📶 Signal Strength Distribution</h4>
+            </div>
+            <div class="bg-blue-50 px-3 py-1 rounded-full">
+              <span class="text-blue-600 text-sm font-semibold">Signal Quality</span>
+            </div>
+          </div>
+          <div class="chart-container animate-in">
+            <canvas id="signalDistributionChart" width="400" height="200" class="w-full"></canvas>
+          </div>
         </div>
 
         <!-- Download Speed Distribution -->
-        <div class="bg-gray-50 p-4 rounded-xl">
-          <h4 class="text-lg font-semibold mb-4 text-gray-800">📥 Download Speed Distribution</h4>
-          <canvas id="downloadDistributionChart" width="400" height="200"></canvas>
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="bg-green-100 rounded-full p-2">
+                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-bold text-gray-800">📥 Download Speed Distribution</h4>
+            </div>
+            <div class="bg-green-50 px-3 py-1 rounded-full">
+              <span class="text-green-600 text-sm font-semibold">Speed Analysis</span>
+            </div>
+          </div>
+          <div class="chart-container animate-in">
+            <canvas id="downloadDistributionChart" width="400" height="200" class="w-full"></canvas>
+          </div>
         </div>
 
         <!-- Time Series Trends -->
-        <div class="bg-gray-50 p-4 rounded-xl lg:col-span-2">
-          <h4 class="text-lg font-semibold mb-4 text-gray-800">📈 Signal Trends (Last 30 Days)</h4>
-          <canvas id="timeSeriesChart" width="800" height="300"></canvas>
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 lg:col-span-2">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="bg-purple-100 rounded-full p-2">
+                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-bold text-gray-800">📈 Signal Trends (Last 30 Days)</h4>
+            </div>
+            <div class="bg-purple-50 px-3 py-1 rounded-full">
+              <span class="text-purple-600 text-sm font-semibold">Trend Analysis</span>
+            </div>
+          </div>
+          <div class="chart-container animate-in">
+            <canvas id="timeSeriesChart" width="800" height="300" class="w-full"></canvas>
+          </div>
         </div>
 
         <!-- Comparative Analysis -->
-        <div class="bg-gray-50 p-4 rounded-xl lg:col-span-2">
-          <h4 class="text-lg font-semibold mb-4 text-gray-800">🏆 City Comparison</h4>
-          <canvas id="comparativeChart" width="800" height="300"></canvas>
+        <div class="bg-white rounded-2xl p-8 shadow-xl border border-gray-100 hover:shadow-2xl transition-all duration-300 lg:col-span-2">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-3">
+              <div class="bg-orange-100 rounded-full p-2">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h4 class="text-xl font-bold text-gray-800">🏆 City Comparison</h4>
+            </div>
+            <div class="bg-orange-50 px-3 py-1 rounded-full">
+              <span class="text-orange-600 text-sm font-semibold">Multi-City</span>
+            </div>
+          </div>
+          <div class="chart-container animate-in">
+            <canvas id="comparativeChart" width="800" height="300" class="w-full"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- Detailed Statistics Table -->
-      <div class="bg-gray-50 p-4 rounded-xl">
-        <h4 class="text-lg font-semibold mb-4 text-gray-800">📋 Detailed Statistics</h4>
-        <div class="overflow-x-auto">
-          <table class="min-w-full bg-white rounded-lg overflow-hidden">
-            <thead class="bg-gray-100">
+      <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 mb-12">
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center space-x-3">
+            <div class="bg-indigo-100 rounded-full p-3">
+              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h4 class="text-2xl font-bold text-gray-800">📋 Detailed Statistics</h4>
+          </div>
+          <div class="flex space-x-2">
+            <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+              </svg>
+              Filter
+            </button>
+            <button class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              Export
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full">
+            <thead class="bg-gradient-to-r from-slate-50 to-gray-50">
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mean</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Median</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Std Dev</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Q25</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Q75</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Metric</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Mean</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Median</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Std Dev</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Min</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Max</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Q25</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Q75</th>
               </tr>
             </thead>
-            <tbody id="statisticsTableBody" class="divide-y divide-gray-200">
+            <tbody id="statisticsTableBody" class="divide-y divide-gray-100">
               <!-- Statistics rows will be populated here -->
             </tbody>
           </table>
@@ -254,17 +501,33 @@
       </div>
 
       <!-- Best and Worst Areas -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        <div class="bg-green-50 p-4 rounded-xl">
-          <h4 class="text-lg font-semibold mb-4 text-green-800">🏆 Best Performing Areas</h4>
-          <div id="bestAreasList" class="space-y-2">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Best Performing Areas -->
+        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 shadow-xl border border-green-100">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="bg-green-500 rounded-full p-3">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+              </svg>
+            </div>
+            <h4 class="text-2xl font-bold text-green-800">🏆 Best Performing Areas</h4>
+          </div>
+          <div id="bestAreasList" class="space-y-4 max-h-80 overflow-y-auto custom-scrollbar">
             <!-- Best areas will be populated here -->
           </div>
         </div>
-
-        <div class="bg-red-50 p-4 rounded-xl">
-          <h4 class="text-lg font-semibold mb-4 text-red-800">⚠️ Areas Needing Improvement</h4>
-          <div id="worstAreasList" class="space-y-2">
+        
+        <!-- Areas Needing Improvement -->
+        <div class="bg-gradient-to-br from-red-50 to-rose-50 rounded-2xl p-8 shadow-xl border border-red-100">
+          <div class="flex items-center space-x-3 mb-6">
+            <div class="bg-red-500 rounded-full p-3">
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+              </svg>
+            </div>
+            <h4 class="text-2xl font-bold text-red-800">⚠️ Areas Needing Improvement</h4>
+          </div>
+          <div id="worstAreasList" class="space-y-4 max-h-80 overflow-y-auto custom-scrollbar">
             <!-- Worst areas will be populated here -->
           </div>
         </div>
@@ -503,30 +766,71 @@
     // Initialize enhanced analytics
     async function initializeEnhancedAnalytics() {
       const city = document.getElementById("citySelect").value;
+      console.log(`Initializing enhanced analytics for city: ${city}`);
       
       try {
         // Show loading state
-        document.getElementById('analyticsLoading').classList.remove('hidden');
-        document.getElementById('analyticsContent').classList.add('hidden');
+        const loadingDiv = document.getElementById('analyticsLoading');
+        const contentDiv = document.getElementById('analyticsContent');
+        
+        loadingDiv.classList.remove('hidden');
+        contentDiv.classList.add('hidden');
+        
+        // Reset loading div content in case it was previously showing an error
+        loadingDiv.innerHTML = `
+          <div class="relative inline-block">
+            <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent mx-auto mb-6"></div>
+            <div class="absolute inset-0 rounded-full h-16 w-16 border-4 border-blue-300 animate-ping opacity-20"></div>
+          </div>
+          <p class="text-gray-600 text-lg font-medium">Loading enhanced analytics...</p>
+          <p class="text-gray-500 text-sm mt-2">Preparing comprehensive insights</p>
+        `;
 
         // Fetch analytics data
+        console.log(`Fetching analytics data from: /api/analytics/${city}`);
         const response = await fetch(`/api/analytics/${city}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         analyticsData = await response.json();
+        console.log('Analytics data received:', analyticsData);
 
         // Update analytics dashboard
         updateAnalyticsDashboard();
 
         // Hide loading state
-        document.getElementById('analyticsLoading').classList.add('hidden');
-        document.getElementById('analyticsContent').classList.remove('hidden');
+        loadingDiv.classList.add('hidden');
+        contentDiv.classList.remove('hidden');
+        
+        console.log('Analytics dashboard updated successfully');
       } catch (error) {
         console.error('Error loading analytics:', error);
-        document.getElementById('analyticsLoading').innerHTML = `
-          <div class="text-red-600">
-            <div class="text-lg font-semibold mb-2">Error Loading Analytics</div>
-            <div class="text-sm">${error.message}</div>
+        
+        // Show error state with proper styling
+        const loadingDiv = document.getElementById('analyticsLoading');
+        loadingDiv.innerHTML = `
+          <div class="text-center py-8">
+            <div class="text-red-500 mb-4">
+              <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="text-red-600">
+              <div class="text-lg font-semibold mb-2">Error Loading Analytics</div>
+              <div class="text-sm text-red-500">${error.message}</div>
+              <div class="mt-4">
+                <button onclick="initializeEnhancedAnalytics()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                  Retry
+                </button>
+              </div>
+            </div>
           </div>
         `;
+        
+        // Keep loading div visible to show error, but hide content
+        document.getElementById('analyticsContent').classList.add('hidden');
       }
     }
 
@@ -534,55 +838,129 @@
     function updateAnalyticsDashboard() {
       if (!analyticsData) return;
 
-      // Update key metrics cards
-      document.getElementById('qualityScore').textContent = analyticsData.quality_score;
-      document.getElementById('totalAreasAnalytics').textContent = analyticsData.total_areas;
-      document.getElementById('avgDownloadAnalytics').textContent = analyticsData.statistics.download_speed.mean.toFixed(1) + ' Mbps';
-      document.getElementById('avgLatencyAnalytics').textContent = analyticsData.statistics.latency.mean.toFixed(1) + ' ms';
+      // Update key metrics cards with animation
+      animateValue('qualityScore', analyticsData.quality_score, 1, '%');
+      animateValue('totalAreasAnalytics', analyticsData.total_areas, 0, '');
+      animateValue('avgDownloadAnalytics', analyticsData.statistics.download_speed.mean, 1, ' Mbps');
+      animateValue('avgLatencyAnalytics', analyticsData.statistics.latency.mean, 1, ' ms');
 
-      // Create charts
-      createDistributionCharts();
-      createTimeSeriesChart();
-      createComparativeChart();
-      updateStatisticsTable();
-      updateBestWorstAreas();
+      // Update quality score progress bar
+      const qualityScore = analyticsData.quality_score;
+      const qualityScoreBar = document.getElementById('qualityScoreBar');
+      if (qualityScoreBar) {
+        setTimeout(() => {
+          qualityScoreBar.style.width = qualityScore + '%';
+        }, 300);
+      }
+
+      // Create charts with smooth transitions
+      setTimeout(() => {
+        createSignalChart();
+        createDistributionCharts();
+        createTimeSeriesChart();
+        createComparativeChart();
+      }, 500);
+
+      // Update table and lists
+      setTimeout(() => {
+        updateStatisticsTable();
+        updateBestWorstAreas();
+      }, 700);
+    }
+
+    // Animate numeric values
+    function animateValue(elementId, endValue, decimals, suffix) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      
+      const startValue = 0;
+      const duration = 1000;
+      const startTime = performance.now();
+      
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const currentValue = startValue + (endValue - startValue) * easeOutQuart(progress);
+        
+        element.textContent = currentValue.toFixed(decimals) + suffix;
+        
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+      
+      requestAnimationFrame(update);
+    }
+    
+    // Easing function for smooth animation
+    function easeOutQuart(t) {
+      return 1 - (--t) * t * t * t;
+    }
+
+    // Create signal strength distribution chart
+    function createSignalChart() {
+      try {
+        const chartElement = document.getElementById('signalDistributionChart');
+        if (!chartElement) {
+          console.error('Signal distribution chart element not found');
+          return;
+        }
+        
+        const ctx = chartElement.getContext('2d');
+        if (charts.signalDistribution) charts.signalDistribution.destroy();
+        
+        if (!analyticsData.coverage_distribution) {
+          console.error('Coverage distribution data not available');
+          return;
+        }
+        
+        charts.signalDistribution = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Excellent (80%+)', 'Good (60-79%)', 'Fair (40-59%)', 'Poor (<40%)'],
+            datasets: [{
+              data: [
+                analyticsData.coverage_distribution.excellent,
+                analyticsData.coverage_distribution.good,
+                analyticsData.coverage_distribution.fair,
+                analyticsData.coverage_distribution.poor
+              ],
+              backgroundColor: ['#10B981', '#F59E0B', '#F97316', '#EF4444'],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { padding: 20 }
+              }
+            }
+          }
+        });
+      } catch (error) {
+        console.error('Error creating signal chart:', error);
+      }
     }
 
     // Create distribution charts
     function createDistributionCharts() {
-      // Signal Strength Distribution
-      const signalCtx = document.getElementById('signalDistributionChart').getContext('2d');
-      if (charts.signalDistribution) charts.signalDistribution.destroy();
-      
-      charts.signalDistribution = new Chart(signalCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Excellent (80%+)', 'Good (60-79%)', 'Fair (40-59%)', 'Poor (<40%)'],
-          datasets: [{
-            data: [
-              analyticsData.coverage_distribution.excellent,
-              analyticsData.coverage_distribution.good,
-              analyticsData.coverage_distribution.fair,
-              analyticsData.coverage_distribution.poor
-            ],
-            backgroundColor: ['#10B981', '#F59E0B', '#F97316', '#EF4444'],
-            borderWidth: 2,
-            borderColor: '#ffffff'
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              position: 'bottom',
-              labels: { padding: 20 }
-            }
-          }
-        }
-      });
+      // Check if Chart.js is available
+      if (typeof Chart === 'undefined') {
+        console.error('Chart.js library not loaded');
+        return;
+      }
 
       // Download Speed Distribution - with error handling
-      const downloadCtx = document.getElementById('downloadDistributionChart').getContext('2d');
+      const downloadChartElement = document.getElementById('downloadDistributionChart');
+      if (!downloadChartElement) {
+        console.error('Download distribution chart element not found');
+        return;
+      }
+      
+      const downloadCtx = downloadChartElement.getContext('2d');
       if (charts.downloadDistribution) charts.downloadDistribution.destroy();
       
       try {
@@ -593,37 +971,59 @@
             data: {
               labels: downloadData.bins.map(bin => `${bin.toFixed(1)} Mbps`),
               datasets: [{
-                label: 'Areas',
+                label: 'Coverage Areas',
                 data: downloadData.counts,
-                backgroundColor: '#3B82F6',
-                borderColor: '#1D4ED8',
-                borderWidth: 1
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderColor: '#10B981',
+                borderWidth: 2,
+                borderRadius: 4,
+                borderSkipped: false
               }]
             },
             options: {
               responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: false
+                }
+              },
               scales: {
                 y: {
                   beginAtZero: true,
-                  title: { display: true, text: 'Number of Areas' }
+                  title: { 
+                    display: true, 
+                    text: 'Number of Areas',
+                    font: { size: 12, weight: 'bold' }
+                  },
+                  grid: {
+                    color: 'rgba(0, 0, 0, 0.1)'
+                  }
                 },
                 x: {
-                  title: { display: true, text: 'Download Speed (Mbps)' }
+                  title: { 
+                    display: true, 
+                    text: 'Download Speed (Mbps)',
+                    font: { size: 12, weight: 'bold' }
+                  },
+                  grid: {
+                    display: false
+                  }
                 }
               }
             }
           });
         } else {
-          // Show placeholder if no data
-          downloadCtx.fillStyle = '#666';
-          downloadCtx.font = '14px Arial';
+          // Show professional placeholder
+          downloadCtx.fillStyle = '#6B7280';
+          downloadCtx.font = '16px Inter, system-ui, sans-serif';
           downloadCtx.textAlign = 'center';
-          downloadCtx.fillText('No histogram data available', downloadCtx.canvas.width / 2, downloadCtx.canvas.height / 2);
+          downloadCtx.fillText('No download speed data available', downloadCtx.canvas.width / 2, downloadCtx.canvas.height / 2);
         }
       } catch (error) {
         console.error('Error creating download distribution chart:', error);
-        downloadCtx.fillStyle = '#666';
-        downloadCtx.font = '14px Arial';
+        downloadCtx.fillStyle = '#6B7280';
+        downloadCtx.font = '16px Inter, system-ui, sans-serif';
         downloadCtx.textAlign = 'center';
         downloadCtx.fillText('Error loading chart data', downloadCtx.canvas.width / 2, downloadCtx.canvas.height / 2);
       }
@@ -643,18 +1043,28 @@
             {
               label: 'Signal Strength',
               data: timeSeriesData.signal_strength,
-              borderColor: '#10B981',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              borderColor: '#3B82F6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
               tension: 0.4,
-              fill: false
+              fill: true,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#3B82F6',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2
             },
             {
               label: 'Download Speed',
               data: timeSeriesData.download_speed,
-              borderColor: '#3B82F6',
-              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              borderColor: '#10B981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
               tension: 0.4,
-              fill: false
+              fill: true,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#10B981',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2
             },
             {
               label: 'Upload Speed',
@@ -662,23 +1072,56 @@
               borderColor: '#8B5CF6',
               backgroundColor: 'rgba(139, 92, 246, 0.1)',
               tension: 0.4,
-              fill: false
+              fill: true,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              pointBackgroundColor: '#8B5CF6',
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2
             }
           ]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           interaction: {
             intersect: false,
             mode: 'index'
           },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12,
+                  weight: '500'
+                }
+              }
+            }
+          },
           scales: {
             y: {
               beginAtZero: true,
-              title: { display: true, text: 'Performance Metrics' }
+              title: { 
+                display: true, 
+                text: 'Performance Metrics',
+                font: { size: 12, weight: 'bold' }
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
             },
             x: {
-              title: { display: true, text: 'Date' }
+              title: { 
+                display: true, 
+                text: 'Date',
+                font: { size: 12, weight: 'bold' }
+              },
+              grid: {
+                display: false
+              }
             }
           }
         }
@@ -695,30 +1138,96 @@
       // Filter to show only top 4 cities for better visualization
       const topCities = comparativeData.slice(0, 4);
       
+      const colors = [
+        { border: '#3B82F6', bg: 'rgba(59, 130, 246, 0.2)', point: '#3B82F6' },
+        { border: '#10B981', bg: 'rgba(16, 185, 129, 0.2)', point: '#10B981' },
+        { border: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.2)', point: '#8B5CF6' },
+        { border: '#F59E0B', bg: 'rgba(245, 158, 11, 0.2)', point: '#F59E0B' }
+      ];
+      
+      // Special styling for current city
+      const currentCityColors = { border: '#EF4444', bg: 'rgba(239, 68, 68, 0.2)', point: '#EF4444' };
+      
       charts.comparative = new Chart(ctx, {
         type: 'radar',
         data: {
           labels: ['Signal Strength', 'Download Speed', 'Upload Speed', 'Latency', 'Quality Score'],
-          datasets: topCities.map((city, index) => ({
-            label: city.city,
-            data: [
-              city.signal_strength,
-              city.download_speed,
-              city.upload_speed,
-              100 - city.latency, // Invert latency for better visualization (lower latency = better)
-              city.quality_score
-            ],
-            borderColor: ['#EF4444', '#3B82F6', '#10B981', '#F59E0B'][index],
-            backgroundColor: ['rgba(239, 68, 68, 0.2)', 'rgba(59, 130, 246, 0.2)', 'rgba(16, 185, 129, 0.2)', 'rgba(245, 158, 11, 0.2)'][index],
-            pointBackgroundColor: ['#EF4444', '#3B82F6', '#10B981', '#F59E0B'][index]
-          }))
+          datasets: topCities.map((city, index) => {
+            const isCurrentCity = city.is_current_city;
+            const colorScheme = isCurrentCity ? currentCityColors : colors[index % colors.length];
+            
+            return {
+              label: city.city + (isCurrentCity ? ' (Current)' : ''),
+              data: [
+                city.signal_strength,
+                city.download_speed,
+                city.upload_speed,
+                100 - city.latency, // Invert latency for better visualization (lower latency = better)
+                city.quality_score
+              ],
+              borderColor: colorScheme.border,
+              backgroundColor: colorScheme.bg,
+              pointBackgroundColor: colorScheme.point,
+              pointBorderColor: '#ffffff',
+              pointBorderWidth: 2,
+              pointRadius: isCurrentCity ? 7 : 5,
+              pointHoverRadius: isCurrentCity ? 9 : 7,
+              borderWidth: isCurrentCity ? 4 : 3,
+              borderDash: isCurrentCity ? [5, 5] : []
+            };
+          })
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12,
+                  weight: '500'
+                },
+                generateLabels: function(chart) {
+                  const original = Chart.defaults.plugins.legend.labels.generateLabels;
+                  const labels = original.call(this, chart);
+                  
+                  // Add special styling for current city in legend
+                  labels.forEach(label => {
+                    if (label.text.includes('(Current)')) {
+                      label.fillStyle = '#EF4444';
+                      label.strokeStyle = '#EF4444';
+                      label.lineWidth = 3;
+                      label.lineDash = [5, 5];
+                    }
+                  });
+                  
+                  return labels;
+                }
+              }
+            }
+          },
           scales: {
             r: {
               beginAtZero: true,
-              max: 100
+              max: 100,
+              ticks: {
+                stepSize: 20
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              angleLines: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              },
+              pointLabels: {
+                font: {
+                  size: 11,
+                  weight: '500'
+                }
+              }
             }
           }
         }
@@ -727,51 +1236,89 @@
 
     // Update statistics table
     function updateStatisticsTable() {
-      const tbody = document.getElementById('statisticsTableBody');
-      const stats = analyticsData.statistics;
-      
-      const metrics = [
-        { name: 'Signal Strength (%)', key: 'signal_strength' },
-        { name: 'Download Speed (Mbps)', key: 'download_speed' },
-        { name: 'Upload Speed (Mbps)', key: 'upload_speed' },
-        { name: 'Latency (ms)', key: 'latency' }
-      ];
+      try {
+        const tbody = document.getElementById('statisticsTableBody');
+        if (!tbody) {
+          console.error('Statistics table body element not found');
+          return;
+        }
+        
+        if (!analyticsData.statistics) {
+          console.error('Statistics data not available');
+          return;
+        }
+        
+        const stats = analyticsData.statistics;
+        
+        const metrics = [
+          { name: 'Signal Strength (%)', key: 'signal_strength' },
+          { name: 'Download Speed (Mbps)', key: 'download_speed' },
+          { name: 'Upload Speed (Mbps)', key: 'upload_speed' },
+          { name: 'Latency (ms)', key: 'latency' }
+        ];
 
-      tbody.innerHTML = metrics.map(metric => {
-        const data = stats[metric.key];
-        return `
-          <tr class="hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium text-gray-900">${metric.name}</td>
-            <td class="px-4 py-3 text-gray-700">${data.mean.toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-700">${data.median.toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-700">${data.std.toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-700">${data.min.toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-700">${data.max.toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-700">${data.q25.toFixed(2)}</td>
-            <td class="px-4 py-3 text-gray-700">${data.q75.toFixed(2)}</td>
-          </tr>
-        `;
-      }).join('');
+        tbody.innerHTML = metrics.map(metric => {
+          const data = stats[metric.key];
+          if (!data) {
+            console.warn(`No data found for metric: ${metric.key}`);
+            return '';
+          }
+          return `
+            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+              <td class="px-6 py-4 font-semibold text-gray-900">${metric.name}</td>
+              <td class="px-6 py-4 text-gray-700 font-medium">${data.mean.toFixed(2)}</td>
+              <td class="px-6 py-4 text-gray-700">${data.median.toFixed(2)}</td>
+              <td class="px-6 py-4 text-gray-700">${data.std.toFixed(2)}</td>
+              <td class="px-6 py-4 text-gray-700">${data.min.toFixed(2)}</td>
+              <td class="px-6 py-4 text-gray-700">${data.max.toFixed(2)}</td>
+              <td class="px-6 py-4 text-gray-700">${data.q25.toFixed(2)}</td>
+              <td class="px-6 py-4 text-gray-700">${data.q75.toFixed(2)}</td>
+            </tr>
+          `;
+        }).join('');
+      } catch (error) {
+        console.error('Error updating statistics table:', error);
+      }
     }
 
     // Update best and worst areas
     function updateBestWorstAreas() {
-      const bestList = document.getElementById('bestAreasList');
-      const worstList = document.getElementById('worstAreasList');
-      
-      bestList.innerHTML = analyticsData.best_areas.map(area => `
-        <div class="flex justify-between items-center p-2 bg-white rounded">
-          <span class="font-medium">${area.name}</span>
-          <span class="text-green-600 font-bold">${area.value.toFixed(1)}%</span>
-        </div>
-      `).join('');
-      
-      worstList.innerHTML = analyticsData.worst_areas.map(area => `
-        <div class="flex justify-between items-center p-2 bg-white rounded">
-          <span class="font-medium">${area.name}</span>
-          <span class="text-red-600 font-bold">${area.value.toFixed(1)}%</span>
-        </div>
-      `).join('');
+      try {
+        const bestList = document.getElementById('bestAreasList');
+        const worstList = document.getElementById('worstAreasList');
+        
+        if (!bestList || !worstList) {
+          console.error('Best or worst areas list elements not found');
+          return;
+        }
+        
+        if (!analyticsData.best_areas || !analyticsData.worst_areas) {
+          console.error('Best or worst areas data not available');
+          return;
+        }
+        
+        bestList.innerHTML = analyticsData.best_areas.map(area => `
+          <div class="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-100 hover:shadow-md transition-all duration-200">
+            <div class="flex items-center space-x-3">
+              <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span class="font-semibold text-gray-800">${area.name}</span>
+            </div>
+            <span class="text-green-600 font-bold text-lg">${area.value.toFixed(1)}%</span>
+          </div>
+        `).join('');
+        
+        worstList.innerHTML = analyticsData.worst_areas.map(area => `
+          <div class="flex items-center justify-between p-3 bg-gradient-to-r from-red-50 to-rose-50 rounded-lg border border-red-100 hover:shadow-md transition-all duration-200">
+            <div class="flex items-center space-x-3">
+              <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+              <span class="font-semibold text-gray-800">${area.name}</span>
+            </div>
+            <span class="text-red-600 font-bold text-lg">${area.value.toFixed(1)}%</span>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error updating best/worst areas:', error);
+      }
     }
 
     // Export functions
@@ -830,6 +1377,356 @@
     document.getElementById("updateMap").addEventListener("click", () => {
       // Reload analytics when city changes
       setTimeout(initializeEnhancedAnalytics, 500);
+    });
+
+    // Neighborhood Search Functionality
+    let currentMarker = null;
+
+    async function searchPlace() {
+      const searchInput = document.getElementById('placeSearch');
+      const placeName = searchInput.value.trim();
+      const currentCity = document.getElementById('citySelect').value;
+      
+      if (!placeName) {
+        showSearchStatus('Please enter a place name', 'error');
+        return;
+      }
+      
+      // Show loading status
+      showSearchStatus('Searching...', 'loading');
+      
+      try {
+        const response = await fetch('/get_place_details', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            place_name: placeName,
+            city: currentCity // Include current city in the request
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Display neighborhood information
+          displayPlaceDetails(data);
+          
+          // Update map with new coordinates
+          updateMapWithCoordinates(data.latitude, data.longitude, data.neighbourhood);
+          
+          showSearchStatus('Location found!', 'success');
+        } else {
+          showSearchStatus(data.error || 'Place not found', 'error');
+          hidePlaceDetails();
+        }
+        
+      } catch (error) {
+        console.error('Search error:', error);
+        showSearchStatus('Search failed. Please try again.', 'error');
+        hidePlaceDetails();
+      }
+    }
+
+    function showSearchStatus(message, type) {
+      const statusDiv = document.getElementById('searchStatus');
+      statusDiv.textContent = message;
+      statusDiv.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-gray-600');
+      
+      if (type === 'success') {
+        statusDiv.classList.add('text-green-600');
+      } else if (type === 'error') {
+        statusDiv.classList.add('text-red-600');
+      } else if (type === 'loading') {
+        statusDiv.classList.add('text-gray-600');
+      }
+      
+      // Auto-hide status after 3 seconds for success messages
+      if (type === 'success') {
+        setTimeout(() => {
+          statusDiv.classList.add('hidden');
+        }, 3000);
+      }
+    }
+
+    function displayPlaceDetails(data) {
+      const detailsDiv = document.getElementById('placeDetails');
+      const neighbourhoodName = document.getElementById('neighbourhoodName');
+      const locationDetails = document.getElementById('locationDetails');
+      
+      neighbourhoodName.textContent = data.neighbourhood;
+      locationDetails.innerHTML = `
+        <div class="flex flex-col space-y-1">
+          <span><strong>City:</strong> ${data.city}</span>
+          <span><strong>District:</strong> ${data.district}</span>
+          <span><strong>State:</strong> ${data.state}</span>
+          <span><strong>Coords:</strong> ${data.latitude.toFixed(4)}, ${data.longitude.toFixed(4)}</span>
+        </div>
+      `;
+      
+      detailsDiv.classList.remove('hidden');
+    }
+
+    function hidePlaceDetails() {
+      document.getElementById('placeDetails').classList.add('hidden');
+    }
+
+    function updateMapWithCoordinates(lat, lon, placeName) {
+      // Remove existing marker if any
+      if (currentMarker) {
+        map.removeLayer(currentMarker);
+      }
+      
+      // Create new marker
+      currentMarker = L.marker([lat, lon]).addTo(map);
+      currentMarker.bindPopup(`
+        <div style="min-width: 200px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #2c3e50;">
+            📍 ${placeName}
+          </h3>
+          <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+            <strong>Coordinates:</strong> ${lat.toFixed(4)}, ${lon.toFixed(4)}
+          </div>
+          <div style="font-size: 11px; color: #999; text-align: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #eee;">
+            Click to view signal coverage in this area
+          </div>
+        </div>
+      `);
+      
+      // Center map on the new location
+      map.setView([lat, lon], 14);
+      
+      // Open popup
+      currentMarker.openPopup();
+      
+      // Load signal coverage data for this area
+      loadAreaCoverage(lat, lon, placeName);
+    }
+
+    async function loadAreaCoverage(lat, lon, placeName) {
+      try {
+        console.log(`Loading coverage data for: ${placeName} at ${lat}, ${lon}`);
+        
+        // Call the new API endpoint to get signal coverage data
+        const response = await fetch(`/api/signal_coverage_at_location?lat=${lat}&lon=${lon}&place_name=${encodeURIComponent(placeName)}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success && result.coverage_data) {
+          const coverage = result.coverage_data;
+          
+          // Update the marker popup with signal strength information
+          if (currentMarker) {
+            currentMarker.setPopupContent(createSignalStrengthPopup(coverage));
+            
+            // Update marker icon based on signal quality
+            const markerIcon = createSignalMarkerIcon(coverage.quality, coverage.quality_color);
+            currentMarker.setIcon(markerIcon);
+          }
+          
+          // Update the place details panel with signal information
+          updatePlaceDetailsWithSignal(coverage);
+          
+          console.log(`Signal coverage loaded: ${coverage.signal_strength}% (${coverage.quality})`);
+        } else {
+          console.warn('No coverage data available for this location');
+          
+          // Update marker to show no coverage
+          if (currentMarker) {
+            currentMarker.setPopupContent(createNoCoveragePopup(placeName));
+            const noSignalIcon = createSignalMarkerIcon('No Coverage', '#6B7280');
+            currentMarker.setIcon(noSignalIcon);
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error loading area coverage:', error);
+        
+        // Show error in marker popup
+        if (currentMarker) {
+          currentMarker.setPopupContent(createErrorPopup(placeName, error.message));
+        }
+      }
+    }
+    
+    function createSignalStrengthPopup(coverage) {
+      const isNearbyArea = coverage.distance_km > 0.1; // Show warning if more than 100m away
+      const distanceWarning = isNearbyArea ? `
+        <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 8px; border-radius: 6px; margin-bottom: 10px; font-size: 12px;">
+          <div style="display: flex; align-items: center; color: #92400e;">
+            <span style="margin-right: 6px;">⚠️</span>
+            <span><strong>Nearby Area:</strong> Signal data from ${coverage.nearest_area} (${coverage.distance_km} km away)</span>
+          </div>
+        </div>
+      ` : '';
+      
+      return `
+        <div style="min-width: 250px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+          <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${coverage.quality_color}; margin-right: 8px;"></div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: bold; color: #2c3e50;">
+              📍 ${coverage.place_name}
+            </h3>
+          </div>
+          
+          ${distanceWarning}
+          
+          <div style="background: linear-gradient(90deg, ${coverage.quality_color}22, ${coverage.quality_color}11); padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-weight: 600; color: #374151;">Signal Strength</span>
+              <span style="font-weight: bold; color: ${coverage.quality_color}; font-size: 18px;">${coverage.signal_strength}%</span>
+            </div>
+            <div style="width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+              <div style="width: ${coverage.signal_strength}%; height: 100%; background: ${coverage.quality_color}; border-radius: 3px; transition: width 0.8s ease-out;"></div>
+            </div>
+            <div style="text-align: center; margin-top: 4px; font-size: 11px; color: #6b7280; font-weight: 500;">
+              ${coverage.quality} Quality
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+            <div style="background: #f8fafc; padding: 8px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 11px; color: #64748b; margin-bottom: 2px;">Download</div>
+              <div style="font-weight: 600; color: #1e293b; font-size: 14px;">${coverage.download_speed} Mbps</div>
+            </div>
+            <div style="background: #f8fafc; padding: 8px; border-radius: 6px; text-align: center;">
+              <div style="font-size: 11px; color: #64748b; margin-bottom: 2px;">Upload</div>
+              <div style="font-weight: 600; color: #1e293b; font-size: 14px;">${coverage.upload_speed} Mbps</div>
+            </div>
+          </div>
+          
+          <div style="background: #f1f5f9; padding: 8px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="color: #64748b;">Latency:</span>
+              <span style="font-weight: 500; color: #1e293b;">${coverage.latency} ms</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="color: #64748b;">Signal Source:</span>
+              <span style="font-weight: 500; color: #1e293b;">${coverage.nearest_area}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+              <span style="color: #64748b;">Samples:</span>
+              <span style="font-weight: 500; color: #1e293b;">${coverage.samples}</span>
+            </div>
+          </div>
+          
+          <div style="font-size: 10px; color: #94a3b8; text-align: center; padding-top: 6px; border-top: 1px solid #e2e8f0;">
+            ${isNearbyArea ? `📍 ${coverage.distance_km} km from your search location` : `📍 Exact location signal data`}
+          </div>
+        </div>
+      `;
+    }
+    
+    function createNoCoveragePopup(placeName) {
+      return `
+        <div style="min-width: 200px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #6b7280;">
+            📍 ${placeName}
+          </h3>
+          <div style="background: #f3f4f6; padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="color: #6b7280; font-size: 14px; margin-bottom: 4px;">⚠️ No Coverage Data</div>
+            <div style="color: #9ca3af; font-size: 11px;">Signal coverage information is not available for this location</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function createErrorPopup(placeName, errorMessage) {
+      return `
+        <div style="min-width: 200px;">
+          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #ef4444;">
+            📍 ${placeName}
+          </h3>
+          <div style="background: #fef2f2; padding: 12px; border-radius: 6px; text-align: center;">
+            <div style="color: #dc2626; font-size: 14px; margin-bottom: 4px;">❌ Error Loading Data</div>
+            <div style="color: #f87171; font-size: 11px;">${errorMessage}</div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function createSignalMarkerIcon(quality, color) {
+      return L.divIcon({
+        className: 'custom-signal-marker',
+        html: `
+          <div style="
+            background: ${color};
+            width: 32px;
+            height: 32px;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              transform: rotate(45deg);
+              color: white;
+              font-size: 12px;
+              font-weight: bold;
+            ">📶</div>
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
+    }
+    
+    function updatePlaceDetailsWithSignal(coverage) {
+      const locationDetails = document.getElementById('locationDetails');
+      const isNearbyArea = coverage.distance_km > 0.1;
+      const distanceInfo = isNearbyArea ? 
+        `<span class="text-orange-600 font-medium">(${coverage.distance_km} km away)</span>` : 
+        '<span class="text-green-600 font-medium">(Exact location)</span>';
+      
+      locationDetails.innerHTML = `
+        <div class="flex flex-col space-y-2">
+          <div class="flex items-center justify-between">
+            <span><strong>Area:</strong> ${coverage.nearest_area} ${distanceInfo}</span>
+            <div class="flex items-center">
+              <div class="w-3 h-3 rounded-full mr-1" style="background-color: ${coverage.quality_color};"></div>
+              <span class="text-sm font-medium" style="color: ${coverage.quality_color};">${coverage.quality}</span>
+            </div>
+          </div>
+          ${isNearbyArea ? `
+            <div class="bg-yellow-50 border border-yellow-200 rounded p-2 text-xs text-yellow-800">
+              <div class="flex items-center">
+                <span class="mr-1">⚠️</span>
+                <span>Signal data from nearby area - ${coverage.distance_km} km from searched location</span>
+              </div>
+            </div>
+          ` : ''}
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div><strong>Signal:</strong> ${coverage.signal_strength}%</div>
+            <div><strong>Download:</strong> ${coverage.download_speed} Mbps</div>
+            <div><strong>Upload:</strong> ${coverage.upload_speed} Mbps</div>
+            <div><strong>Latency:</strong> ${coverage.latency} ms</div>
+          </div>
+          <div class="text-xs text-gray-500">
+            <strong>City:</strong> ${coverage.city} | <strong>Samples:</strong> ${coverage.samples}
+          </div>
+        </div>
+      `;
+    }
+
+    // Allow Enter key to trigger search
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('placeSearch');
+      if (searchInput) {
+        searchInput.addEventListener('keypress', function(event) {
+          if (event.key === 'Enter') {
+            searchPlace();
+          }
+        });
+      }
     });
   </script>
 </body>

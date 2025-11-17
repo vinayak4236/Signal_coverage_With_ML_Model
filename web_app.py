@@ -1296,25 +1296,28 @@ def generate_histogram_data(values, min_val, max_val, bins=10):
 
 def get_comparative_city_data(current_city):
     """Get comparative data for multiple cities."""
-    # List of major cities for comparison
-    major_cities = ['Mumbai', 'Delhi', 'Bengaluru', 'Kolkata', 'Chennai', 'Hyderabad', 'Pune', 'Ahmedabad']
+    # List of available cities for comparison (matching the dropdown in the template)
+    available_cities = ['Bangalore', 'Delhi', 'Mumbai']
     
     comparative_data = []
     
-    for city in major_cities:
-        if city.lower() == current_city.lower():
-            continue
-            
+    for city in available_cities:
         try:
             # Simulate comparative data (in real implementation, this would fetch actual data)
-            comparative_data.append({
+            city_data = {
                 'city': city,
                 'signal_strength': random.uniform(60, 90),
                 'download_speed': random.uniform(20, 50),
                 'upload_speed': random.uniform(6, 18),
                 'latency': random.uniform(15, 45),
                 'quality_score': random.uniform(65, 85)
-            })
+            }
+            
+            # Mark current city with special indicator
+            if city.lower() == current_city.lower():
+                city_data['is_current_city'] = True
+            
+            comparative_data.append(city_data)
         except Exception as e:
             app.logger.warning(f"Could not get comparative data for {city}: {e}")
             continue
@@ -1391,6 +1394,325 @@ def api_export_data(city, format):
     except Exception as e:
         app.logger.error(f"Error in api_export_data: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
+
+def get_neighbourhood(place_name):
+    """Get detailed neighborhood information from OpenStreetMap Nominatim API."""
+    try:
+        # Use Nominatim API for geocoding with detailed address information
+        url = "https://nominatim.openstreetmap.org/search"
+        params = {
+            'q': place_name,
+            'format': 'json',
+            'limit': 1,
+            'addressdetails': 1,
+            'namedetails': 0,
+            'extratags': 0
+        }
+        
+        headers = {
+            'User-Agent': 'SignalCoverageApp/1.0'
+        }
+        
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data and len(data) > 0:
+                result = data[0]
+                address = result.get('address', {})
+                
+                # Extract neighborhood information with fallback hierarchy
+                neighbourhood = (
+                    address.get('suburb') or 
+                    address.get('neighbourhood') or 
+                    address.get('city_district') or 
+                    address.get('district') or 
+                    address.get('quarter') or 
+                    address.get('residential') or
+                    address.get('village') or
+                    address.get('town') or
+                    address.get('city') or
+                    'Unknown'
+                )
+                
+                city = (
+                    address.get('city') or 
+                    address.get('town') or 
+                    address.get('village') or 
+                    address.get('municipality') or
+                    'Unknown'
+                )
+                
+                district = (
+                    address.get('district') or 
+                    address.get('county') or 
+                    address.get('region') or
+                    'Unknown'
+                )
+                
+                state = (
+                    address.get('state') or 
+                    address.get('region') or 
+                    address.get('province') or
+                    'Unknown'
+                )
+                
+                return {
+                    'neighbourhood': neighbourhood,
+                    'city': city,
+                    'district': district,
+                    'state': state,
+                    'latitude': float(result['lat']),
+                    'longitude': float(result['lon']),
+                    'display_name': result.get('display_name', place_name),
+                    'success': True
+                }
+            else:
+                return {
+                    'error': 'Place not found',
+                    'success': False
+                }
+        else:
+            return {
+                'error': f'API request failed with status {response.status_code}',
+                'success': False
+            }
+            
+    except requests.exceptions.Timeout:
+        return {
+            'error': 'Request timeout - please try again',
+            'success': False
+        }
+    except requests.exceptions.RequestException as e:
+        return {
+            'error': f'Network error: {str(e)}',
+            'success': False
+        }
+    except Exception as e:
+        return {
+            'error': f'Error processing location: {str(e)}',
+            'success': False
+        }
+
+@app.route('/get_place_details', methods=['POST'])
+def get_place_details():
+    """API endpoint to get detailed neighborhood information for any place name."""
+    try:
+        data = request.get_json()
+        if not data or 'place_name' not in data:
+            return jsonify({
+                'error': 'Missing place_name in request',
+                'success': False
+            }), 400
+        
+        place_name = data['place_name'].strip()
+        current_city = data.get('city', '').strip()  # Get current city from request
+        
+        if not place_name:
+            return jsonify({
+                'error': 'Place name cannot be empty',
+                'success': False
+            }), 400
+        
+        # Get neighborhood details
+        result = get_neighbourhood(place_name)
+        
+        if result['success']:
+            # If city is specified, check if the result matches the current city
+            if current_city:
+                # Convert city names to lowercase for comparison
+                result_city = result.get('city', '').lower()
+                current_city_lower = current_city.lower()
+                
+                # Check if the result is in the requested city
+                if result_city and result_city != current_city_lower:
+                    # Try to find the place specifically in the requested city
+                    city_specific_result = get_neighbourhood(f"{place_name} {current_city}")
+                    if city_specific_result['success']:
+                        return jsonify(city_specific_result)
+                    else:
+                        return jsonify({
+                            'error': f'Place "{place_name}" not found in {current_city.title()}',
+                            'success': False
+                        }), 404
+            
+            return jsonify(result)
+        else:
+            # If city is specified and general search failed, try city-specific search
+            if current_city:
+                city_specific_result = get_neighbourhood(f"{place_name} {current_city}")
+                if city_specific_result['success']:
+                    return jsonify(city_specific_result)
+            
+            return jsonify({
+                'error': result.get('error', 'Place not found'),
+                'success': False
+            }), 404
+            
+    except Exception as e:
+        app.logger.error(f"Error in get_place_details: {e}", exc_info=True)
+        return jsonify({
+            'error': 'Internal server error',
+            'success': False
+        }), 500
+
+@app.route('/api/signal_coverage_at_location', methods=['GET'])
+def api_signal_coverage_at_location():
+    """Get signal coverage data for a specific geographic location."""
+    try:
+        # Get coordinates from request
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+        place_name = request.args.get('place_name', 'Unknown Location')
+        
+        # Find the nearest city based on coordinates
+        city = find_nearest_city(lat, lon)
+        
+        if not city:
+            return jsonify({
+                'error': 'No coverage data available for this location',
+                'success': False
+            }), 404
+        
+        # Define data directory
+        DATA_DIR = BASE_DIR / "data"
+        
+        # Load the city's coverage data
+        geojson_file = DATA_DIR / f'{city}_areas.geojson'
+        if not os.path.exists(geojson_file):
+            return jsonify({
+                'error': 'Coverage data not available for this region',
+                'success': False
+            }), 404
+        
+        with open(geojson_file, 'r', encoding='utf-8') as f:
+            geojson_data = json.load(f)
+        
+        # Find the nearest area/feature to the given coordinates
+        nearest_feature = None
+        min_distance = float('inf')
+        
+        for feature in geojson_data['features']:
+            # Get the centroid of the feature
+            if feature['geometry']['type'] == 'Polygon':
+                coords = feature['geometry']['coordinates'][0]
+            elif feature['geometry']['type'] == 'MultiPolygon':
+                coords = feature['geometry']['coordinates'][0][0]
+            else:
+                continue
+            
+            # Calculate centroid
+            centroid_lat = sum(coord[1] for coord in coords) / len(coords)
+            centroid_lon = sum(coord[0] for coord in coords) / len(coords)
+            
+            # Calculate distance to the given point
+            distance = haversine_distance(lat, lon, centroid_lat, centroid_lon)
+            
+            if distance < min_distance:
+                min_distance = distance
+                nearest_feature = feature
+        
+        if not nearest_feature:
+            return jsonify({
+                'error': 'No coverage areas found near this location',
+                'success': False
+            }), 404
+        
+        # Extract signal data from the nearest feature
+        props = nearest_feature['properties']
+        
+        # Calculate signal quality
+        signal_strength = props.get('signal_strength', 0)
+        quality = get_signal_quality(signal_strength)
+        
+        # Create comprehensive coverage data
+        coverage_data = {
+            'place_name': place_name,
+            'coordinates': {'lat': lat, 'lon': lon},
+            'nearest_area': props.get('name', 'Unknown Area'),
+            'city': city,
+            'signal_strength': signal_strength,
+            'download_speed': props.get('download_mbps', 0),
+            'upload_speed': props.get('upload_mbps', 0),
+            'latency': props.get('latency_ms', 0),
+            'quality': quality,
+            'quality_color': get_quality_color(quality),
+            'samples': props.get('samples', 0),
+            'distance_km': round(min_distance, 2)
+        }
+        
+        return jsonify({
+            'coverage_data': coverage_data,
+            'success': True
+        })
+        
+    except ValueError as e:
+        return jsonify({
+            'error': 'Invalid coordinates provided',
+            'success': False
+        }), 400
+    except Exception as e:
+        app.logger.error(f"Error in api_signal_coverage_at_location: {e}", exc_info=True)
+        return jsonify({
+            'error': 'Internal server error',
+            'success': False
+        }), 500
+
+def find_nearest_city(lat, lon):
+    """Find the nearest city based on coordinates."""
+    city_coords = {
+        'bangalore': (12.9716, 77.5946),
+        'delhi': (28.7041, 77.1025),
+        'mumbai': (19.0760, 72.8777)
+    }
+    
+    min_distance = float('inf')
+    nearest_city = None
+    
+    for city, (city_lat, city_lon) in city_coords.items():
+        distance = haversine_distance(lat, lon, city_lat, city_lon)
+        if distance < min_distance:
+            min_distance = distance
+            nearest_city = city
+    
+    return nearest_city
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """Calculate the great circle distance between two points on Earth."""
+    from math import radians, cos, sin, asin, sqrt
+    
+    # Convert decimal degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+    
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 6371  # Radius of Earth in kilometers
+    
+    return c * r
+
+def get_signal_quality(signal_strength):
+    """Convert signal strength to quality rating."""
+    if signal_strength >= 80:
+        return 'Excellent'
+    elif signal_strength >= 60:
+        return 'Good'
+    elif signal_strength >= 40:
+        return 'Fair'
+    else:
+        return 'Poor'
+
+def get_quality_color(quality):
+    """Get color for signal quality."""
+    color_map = {
+        'Excellent': '#10B981',
+        'Good': '#3B82F6',
+        'Fair': '#F59E0B',
+        'Poor': '#EF4444'
+    }
+    return color_map.get(quality, '#6B7280')
 
 if __name__ == '__main__':
     # Set up logging
