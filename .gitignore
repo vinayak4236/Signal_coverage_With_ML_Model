@@ -153,18 +153,17 @@ cache/
 *.cache
 
 # Model files (large files should be downloaded separately)
-models/*.pkl
-models/*.joblib
-models/*.h5
-models/*.pkl
-models/*.sav
+# models/*.pkl
+# models/*.joblib
+# models/*.h5
+# models/*.sav
 
 # Data files (large datasets should be downloaded separately)
-data/*.csv
-data/*.geojson
-data/*.json
-outputs/*.geojson
-outputs/*.json
+# data/*.csv
+# data/*.geojson
+# data/*.json
+# outputs/*.geojson
+# outputs/*.json
 
 # Log files
 *.log
