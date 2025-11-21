@@ -11,11 +11,11 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-downloads/
+# downloads/  # Commented out - may contain important downloaded data
 eggs/
 .eggs/
-lib/
-lib64/
+# lib/  # Commented out - may contain important libraries
+# lib64/  # Commented out - may contain important libraries
 parts/
 sdist/
 var/
@@ -149,8 +149,8 @@ ehthumbs.db
 Thumbs.db
 
 # Cache files
-cache/
-*.cache
+# cache/  # Commented out - may contain important cache data
+# *.cache  # Commented out - may contain important cache data
 
 # Model files (large files should be downloaded separately)
 # models/*.pkl
@@ -170,9 +170,9 @@ cache/
 logs/
 
 # Temporary files
-tmp/
-temp/
-*.tmp
+# tmp/  # Commented out - may contain important temporary data
+# temp/  # Commented out - may contain important temporary data
+# *.tmp  # Commented out - may contain important temporary data
 
 # Node modules (if frontend is used)
 node_modules/
